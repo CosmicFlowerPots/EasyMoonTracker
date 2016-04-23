@@ -41,6 +41,14 @@
                 android:text="@string/dummy_button" />
 
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/magnetoData"
+            android:layout_gravity="center"
+            android:id="@+id/magnetoDataText" />
     </FrameLayout>
 
 </FrameLayout>
