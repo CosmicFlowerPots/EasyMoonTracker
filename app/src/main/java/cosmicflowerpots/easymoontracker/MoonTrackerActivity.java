@@ -47,9 +47,9 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     private SensorManager mSensorManager;
     private Sensor accelerometer = null;
     private Sensor magnetometer = null;
-    private float[] rotationMatrix;
-    private float[] accelerometerValues;
-    private float[] magnetometerValues;
+    private float[] rotationMatrix = new float[9];
+    private float[] accelerometerValues = new float[3];
+    private float[] magnetometerValues = new float[3];
     private float[] orientation = {0,0,0};
 
 
@@ -210,7 +210,8 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         }
         SensorManager.getRotationMatrix(this.rotationMatrix, null, accelerometerValues, magnetometerValues);
         SensorManager.getOrientation(this.rotationMatrix, this.orientation);
-        magnetoData.setText((int) orientation[0]);
+        magnetoData = (TextView) findViewById(R.id.magnetoDataText);
+        magnetoData.setText(String.valueOf(orientation[0]));
     }
 
     @Override
