@@ -58,7 +58,9 @@ public class Position extends AppCompatActivity {
                 azimuth = jObject.getDouble("azimuth");
 
             } // End Loop
+
         } catch (JSONException e) {
+
             Log.e("JSONException", "Error: " + e.toString());
         }
 

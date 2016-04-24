@@ -2,18 +2,24 @@ package cosmicflowerpots.easymoontracker;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,12 +65,15 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     private float[] magnetometerValues = new float[3];
     private float[] orientation = {0,0,0};
     private float[] orientationAux = {0,0,0};
+    public Camera mCamera;
+    private CameraPreview mPreview;
     AsynctaskJSON proof = new AsynctaskJSON();
     String wololo;
     String phase;
     double azimuth;
     double altitude;
     double rangeAmplitude = 1.0;
+    ImageView moonImg;
 
 
     @Override
@@ -75,14 +84,18 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
+
+
         if (accelerometer != null && magnetometer != null){
             mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
 
         setContentView(R.layout.activity_moon_tracker);
+        moonImg = (ImageView) findViewById(R.id.moonpic);
 
-        //text.setText("wololo");
+        //moonImg.invalidate();
+
         proof.execute();
         try {
             wololo = proof.get();
@@ -110,6 +123,15 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
             }
         });
 
+
+        // Camara
+        initCamera();
+        mPreview = new CameraPreview(this, mCamera);
+        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.addView(mPreview);
+
+
+
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
@@ -131,9 +153,9 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 
                 phase = jObject.getString("phase");
                 altitude = jObject.getDouble("altitude");
-                altitude = Math.toRadians(altitude);
+                altitude = Math.toRadians(altitude + 90);
                 azimuth = jObject.getDouble("azimuth");
-                azimuth = Math.toRadians(azimuth);
+                azimuth = Math.toRadians(azimuth + 90);
 
             } // End Loop
         } catch (JSONException e) {
@@ -261,9 +283,9 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         SensorManager.getRotationMatrix(this.rotationMatrix, null, accelerometerValues, magnetometerValues);
         orientationAux = SensorManager.getOrientation(this.rotationMatrix, this.orientation);
         magnetoData = (TextView) findViewById(R.id.magnetoDataText);
-        magnetoData.setText("Acimut:" + String.valueOf(orientation[0])
+        magnetoData.setText("Acimut:" + String.valueOf((double)Math.toDegrees(orientation[0]))
                             + "\n" +
-                            "Elevación: " + String.valueOf(orientation[1]));
+                            "Elevación: " + String.valueOf((double)Math.toDegrees(orientation[1])));
 //                            + "\n" +
 //                            "Acimut aux:" + String.valueOf(orientationAux[0])
 //                            + "\n" +
@@ -281,11 +303,15 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
             (double)orientation[1] < altitude + rangeAmplitude)
         {
 
-            prueba.setText("Ahí está!");
+            prueba.setText("¡Ahí está!");
+            //ImageView moonImg = (ImageView) findViewById(R.id.moonpic);
+            moonImg.setImageResource(R.drawable.bigmoon);
+            moonImg.bringToFront();
         }
         else
         {
-            prueba.setText("Sigue probando!");
+            prueba.setText("¡Sigue buscando!");
+            moonImg.setImageResource(0);
         }
 
         //prueba = (TextView) findViewById(R.id.prueba);
@@ -293,6 +319,45 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 //                + "\n" +
 //                "Elevación: " + String.valueOf(altitude));
 
+    }
+
+    void initCamera()
+    {
+        if(Camera.getNumberOfCameras()>0)
+        {
+            mCamera= Camera.open(0);
+            try
+            {
+                //mCamera.cancelAutoFocus();
+                Camera.Parameters params = mCamera.getParameters();
+                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                mCamera.setParameters(params);
+            }
+            catch (RuntimeException a) {
+
+            }
+            try{
+
+                mCamera.setDisplayOrientation(90);
+            }
+            catch (NullPointerException a)
+            {
+                mCamera.setDisplayOrientation(90);
+            }
+
+        }
+        else
+        {
+            new AlertDialog.Builder(this)
+                    .setTitle("Error :(")
+                    .setPositiveButton("Quit", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+
+                    .show();
+        }
     }
 
     @Override

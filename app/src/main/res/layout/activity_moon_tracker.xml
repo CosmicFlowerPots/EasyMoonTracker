@@ -20,9 +20,8 @@
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
-    <FrameLayout android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+    <FrameLayout android:id="@+id/camera_preview" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1">
+    </FrameLayout>
 
         <LinearLayout android:id="@+id/fullscreen_content_controls"
             style="?metaButtonBarStyle"
@@ -47,7 +46,7 @@
             android:layout_height="156dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/magnetoData"
-            android:layout_gravity="center"
+            android:layout_gravity="bottom"
             android:id="@+id/magnetoDataText" />
 
         <TextView
@@ -55,6 +54,14 @@
             android:layout_height="174dp"
             android:id="@+id/prueba"
             android:layout_gravity="center_horizontal|bottom" />
-    </FrameLayout>
+        <ImageView
 
+            android:id="@+id/moonpic"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/bigmoon"
+            android:layout_gravity="center"
+
+            />
 </FrameLayout>
+
