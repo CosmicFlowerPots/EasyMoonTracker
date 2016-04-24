@@ -8,6 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Vibrator;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,8 +25,8 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
+import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
 
 
@@ -56,7 +57,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     private View mControlsView;
     private boolean mVisible;
     private TextView magnetoData;
-    private TextView prueba;
+    private TextView letrero;
     private SensorManager mSensorManager;
     private Sensor accelerometer = null;
     private Sensor magnetometer = null;
@@ -74,6 +75,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     double altitude;
     double rangeAmplitude = 1.0;
     ImageView moonImg;
+    Vibrator v;
 
 
     @Override
@@ -93,6 +95,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 
         setContentView(R.layout.activity_moon_tracker);
         moonImg = (ImageView) findViewById(R.id.moonpic);
+        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         //moonImg.invalidate();
 
@@ -112,7 +115,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
         int azimuth = (int) orientation[0];
-        prueba = (TextView) findViewById(R.id.prueba);
+        letrero = (TextView) findViewById(R.id.letrero);
 
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -283,9 +286,12 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         SensorManager.getRotationMatrix(this.rotationMatrix, null, accelerometerValues, magnetometerValues);
         orientationAux = SensorManager.getOrientation(this.rotationMatrix, this.orientation);
         magnetoData = (TextView) findViewById(R.id.magnetoDataText);
-        magnetoData.setText("Acimut:" + String.valueOf((double)Math.toDegrees(orientation[0]))
+        DecimalFormat formatoDecimal = new DecimalFormat("###.##");
+        Double oriHorz = (double)Math.toDegrees(orientation[0]);
+        Double oriVer = (double)Math.toDegrees(orientation[1]);
+        magnetoData.setText("H:" + String.valueOf(formatoDecimal.format(oriHorz))
                             + "\n" +
-                            "Elevación: " + String.valueOf((double)Math.toDegrees(orientation[1])));
+                            "V: " + String.valueOf(formatoDecimal.format(oriVer)));
 //                            + "\n" +
 //                            "Acimut aux:" + String.valueOf(orientationAux[0])
 //                            + "\n" +
@@ -303,19 +309,20 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
             (double)orientation[1] < altitude + rangeAmplitude)
         {
 
-            prueba.setText("¡Ahí está!");
+            letrero.setText("¡Ahí está!");
             //ImageView moonImg = (ImageView) findViewById(R.id.moonpic);
             moonImg.setImageResource(R.drawable.bigmoon);
             moonImg.bringToFront();
+            v.vibrate(500);
         }
         else
         {
-            prueba.setText("¡Sigue buscando!");
+            letrero.setText("¡Sigue buscando!");
             moonImg.setImageResource(0);
         }
 
-        //prueba = (TextView) findViewById(R.id.prueba);
-//        prueba.setText("Acimut:" + String.valueOf(azimuth)
+        //letrero = (TextView) findViewById(R.id.letrero);
+//        letrero.setText("Acimut:" + String.valueOf(azimuth)
 //                + "\n" +
 //                "Elevación: " + String.valueOf(altitude));
 
