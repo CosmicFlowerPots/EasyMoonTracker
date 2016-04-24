@@ -225,7 +225,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 
     public void onSensorChangedRationally()
     {
-//        AsynctaskJSON proof = new AsynctaskJSON();
+
     }
 
     @Override
