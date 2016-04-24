@@ -10,11 +10,17 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
+
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -44,6 +50,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     private View mControlsView;
     private boolean mVisible;
     private TextView magnetoData;
+    private TextView prueba;
     private SensorManager mSensorManager;
     private Sensor accelerometer = null;
     private Sensor magnetometer = null;
@@ -52,6 +59,12 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     private float[] magnetometerValues = new float[3];
     private float[] orientation = {0,0,0};
     private float[] orientationAux = {0,0,0};
+    AsynctaskJSON proof = new AsynctaskJSON();
+    String wololo;
+    String phase;
+    double azimuth;
+    double altitude;
+    double rangeAmplitude = 1.0;
 
 
     @Override
@@ -69,11 +82,24 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 
         setContentView(R.layout.activity_moon_tracker);
 
+        //text.setText("wololo");
+        proof.execute();
+        try {
+            wololo = proof.get();
+            JSONDataParse(wololo);
+            //text.setText(wololo);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
         mVisible = true;
         magnetoData = (TextView) findViewById(R.id.magnetoDataText);
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
         int azimuth = (int) orientation[0];
+        prueba = (TextView) findViewById(R.id.prueba);
 
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -91,6 +117,28 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 
 
 
+    }
+
+    public void JSONDataParse(String data) {
+//        TextView text = (TextView) findViewById(R.id.moonCrap);
+//        TextView textTwo = (TextView) findViewById(R.id.moonCrapTwo);
+//        TextView textThree = (TextView) findViewById(R.id.moonCrapThree);
+        try {
+            JSONArray jArray = new JSONArray(data);
+            for(int i=0; i < jArray.length(); i++) {
+
+                JSONObject jObject = jArray.getJSONObject(i);
+
+                phase = jObject.getString("phase");
+                altitude = jObject.getDouble("altitude");
+                altitude = Math.toRadians(altitude);
+                azimuth = jObject.getDouble("azimuth");
+                azimuth = Math.toRadians(azimuth);
+
+            } // End Loop
+        } catch (JSONException e) {
+            Log.e("JSONException", "Error: " + e.toString());
+        }
     }
 
     @Override
@@ -221,10 +269,29 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 //                            + "\n" +
 //                            "Elevación aux: " + String.valueOf(orientationAux[1]));
 
+        onSensorChangedRationally();
     }
 
     public void onSensorChangedRationally()
     {
+
+        if ((double)orientation[0] > azimuth - rangeAmplitude &&
+            (double)orientation[0] < azimuth + rangeAmplitude &&
+            (double)orientation[1] > altitude - rangeAmplitude &&
+            (double)orientation[1] < altitude + rangeAmplitude)
+        {
+
+            prueba.setText("Ahí está!");
+        }
+        else
+        {
+            prueba.setText("Sigue probando!");
+        }
+
+        //prueba = (TextView) findViewById(R.id.prueba);
+//        prueba.setText("Acimut:" + String.valueOf(azimuth)
+//                + "\n" +
+//                "Elevación: " + String.valueOf(altitude));
 
     }
 

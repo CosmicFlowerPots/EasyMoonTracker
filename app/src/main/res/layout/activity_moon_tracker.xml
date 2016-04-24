@@ -49,6 +49,12 @@
             android:text="@string/magnetoData"
             android:layout_gravity="center"
             android:id="@+id/magnetoDataText" />
+
+        <TextView
+            android:layout_width="229dp"
+            android:layout_height="174dp"
+            android:id="@+id/prueba"
+            android:layout_gravity="center_horizontal|bottom" />
     </FrameLayout>
 
 </FrameLayout>

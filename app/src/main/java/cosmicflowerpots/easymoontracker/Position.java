@@ -1,9 +1,7 @@
 package cosmicflowerpots.easymoontracker;
 
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,17 +10,33 @@ import org.json.JSONObject;
 import java.util.concurrent.ExecutionException;
 
 public class Position extends AppCompatActivity {
-    AsynctaskJSON proof = new AsynctaskJSON();
-    String rawData;
+    static AsynctaskJSON proof = new AsynctaskJSON();
+    static String rawData;
+//    public String phase = "";
+//    public double azimuth = 0.0;
+//    public double altitude = 0.0;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_main);
+//    @Override
+//    protected void onCreate(Bundle savedInstanceState){
+//        super.onCreate(savedInstanceState);
+////        setContentView(R.layout.activity_main);
+//        proof.execute();
+//        try {
+//            rawData = proof.get();
+//            JSONDataParse(rawData);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    public static void requestData(String phase, double azimuth, double altitude)
+    {
         proof.execute();
         try {
             rawData = proof.get();
-            JSONDataParse(rawData);
+            JSONDataParse(rawData, phase, azimuth, altitude);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -30,17 +44,10 @@ public class Position extends AppCompatActivity {
         }
     }
 
-    public void JSONDataParse(String data) {
-//        TextView text = (TextView) findViewById(R.id.moonCrap);
-//        TextView textTwo = (TextView) findViewById(R.id.moonCrapTwo);
-//        TextView textThree = (TextView) findViewById(R.id.moonCrapThree);
-
-        String phase = "";
-        double azimuth;
-        double altitude;
+    private static void JSONDataParse(String rawData, String phase, double azimuth, double altitude) {
 
         try {
-            JSONArray jsonArray = new JSONArray(data);
+            JSONArray jsonArray = new JSONArray(rawData);
 
             for(int i=0; i < jsonArray.length(); i++) {
 
@@ -54,6 +61,7 @@ public class Position extends AppCompatActivity {
         } catch (JSONException e) {
             Log.e("JSONException", "Error: " + e.toString());
         }
+
     }
     /*try {
             JSONArray jArray = new JSONArray(s);
