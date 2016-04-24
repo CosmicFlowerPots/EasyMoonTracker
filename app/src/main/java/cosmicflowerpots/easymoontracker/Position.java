@@ -4,7 +4,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
-import com.example.lalotone.moon.asynctask.AsynctaskJSON;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,14 +11,14 @@ import org.json.JSONObject;
 
 import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity {
+public class Position extends AppCompatActivity {
     AsynctaskJSON proof = new AsynctaskJSON();
     String rawData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+//        setContentView(R.layout.activity_main);
         proof.execute();
         try {
             rawData = proof.get();
@@ -32,22 +31,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void JSONDataParse(String data) {
-        TextView text = (TextView) findViewById(R.id.moonCrap);
-        TextView textTwo = (TextView) findViewById(R.id.moonCrapTwo);
-        TextView textThree = (TextView) findViewById(R.id.moonCrapThree);
+//        TextView text = (TextView) findViewById(R.id.moonCrap);
+//        TextView textTwo = (TextView) findViewById(R.id.moonCrapTwo);
+//        TextView textThree = (TextView) findViewById(R.id.moonCrapThree);
+
+        String phase = "";
+        double azimuth;
+        double altitude;
+
         try {
-            JSONArray jArray = new JSONArray(data);
+            JSONArray jsonArray = new JSONArray(data);
 
-            for(int i=0; i < jArray.length(); i++) {
+            for(int i=0; i < jsonArray.length(); i++) {
 
-                JSONObject jObject = jArray.getJSONObject(i);
+                JSONObject jObject = jsonArray.getJSONObject(i);
 
-                String phase = jObject.getString("phase");
-                text.setText(phase);
-                String altitude = jObject.getString("altitude");
-                textTwo.setText(altitude);
-                String azimuth = jObject.getString("azimuth");
-                textThree.setText(azimuth);
+                phase = jObject.getString("phase");
+                altitude = jObject.getDouble("altitude");
+                azimuth = jObject.getDouble("azimuth");
 
             } // End Loop
         } catch (JSONException e) {
