@@ -1,18 +1,27 @@
 package cosmicflowerpots.easymoontracker;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
+
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class MoonTrackerActivity extends AppCompatActivity {
+public class MoonTrackerActivity extends AppCompatActivity implements SensorEventListener{
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -34,16 +43,37 @@ public class MoonTrackerActivity extends AppCompatActivity {
     private View mContentView;
     private View mControlsView;
     private boolean mVisible;
+    private TextView magnetoData;
+    private SensorManager mSensorManager;
+    private Sensor accelerometer = null;
+    private Sensor magnetometer = null;
+    private float[] rotationMatrix = new float[9];
+    private float[] accelerometerValues = new float[3];
+    private float[] magnetometerValues = new float[3];
+    private float[] orientation = {0,0,0};
+    private float[] orientationAux = {0,0,0};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        if (accelerometer != null && magnetometer != null){
+            mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
         setContentView(R.layout.activity_moon_tracker);
 
         mVisible = true;
+        magnetoData = (TextView) findViewById(R.id.magnetoDataText);
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = findViewById(R.id.fullscreen_content);
+        int azimuth = (int) orientation[0];
 
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -57,7 +87,10 @@ public class MoonTrackerActivity extends AppCompatActivity {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        // findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+
+
+
     }
 
     @Override
@@ -164,5 +197,43 @@ public class MoonTrackerActivity extends AppCompatActivity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        switch (event.sensor.getType()){
+            case Sensor.TYPE_ACCELEROMETER:
+                accelerometerValues = event.values;
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                magnetometerValues = event.values;
+                break;
+        }
+
+        SensorManager.getRotationMatrix(this.rotationMatrix, null, accelerometerValues, magnetometerValues);
+        orientationAux = SensorManager.getOrientation(this.rotationMatrix, this.orientation);
+        magnetoData = (TextView) findViewById(R.id.magnetoDataText);
+        magnetoData.setText("Acimut:" + String.valueOf(orientation[0])
+                            + "\n" +
+                            "Elevación: " + String.valueOf(orientation[1]));
+//                            + "\n" +
+//                            "Acimut aux:" + String.valueOf(orientationAux[0])
+//                            + "\n" +
+//                            "Elevación aux: " + String.valueOf(orientationAux[1]));
+
+    }
+
+    public void onSensorChangedRationally()
+    {
+//        AsynctaskJSON proof = new AsynctaskJSON();
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    public float[] getOrientation(){
+        return orientation;
     }
 }
