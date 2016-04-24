@@ -51,6 +51,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     private float[] accelerometerValues = new float[3];
     private float[] magnetometerValues = new float[3];
     private float[] orientation = {0,0,0};
+    private float[] orientationAux = {0,0,0};
 
 
     @Override
@@ -208,10 +209,23 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
                 magnetometerValues = event.values;
                 break;
         }
+
         SensorManager.getRotationMatrix(this.rotationMatrix, null, accelerometerValues, magnetometerValues);
-        SensorManager.getOrientation(this.rotationMatrix, this.orientation);
+        orientationAux = SensorManager.getOrientation(this.rotationMatrix, this.orientation);
         magnetoData = (TextView) findViewById(R.id.magnetoDataText);
-        magnetoData.setText(String.valueOf(orientation[0]));
+        magnetoData.setText("Acimut:" + String.valueOf(orientation[0])
+                            + "\n" +
+                            "Elevación: " + String.valueOf(orientation[1]));
+//                            + "\n" +
+//                            "Acimut aux:" + String.valueOf(orientationAux[0])
+//                            + "\n" +
+//                            "Elevación aux: " + String.valueOf(orientationAux[1]));
+
+    }
+
+    public void onSensorChangedRationally()
+    {
+//        AsynctaskJSON proof = new AsynctaskJSON();
     }
 
     @Override

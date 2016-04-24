@@ -43,8 +43,8 @@
         </LinearLayout>
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="156dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/magnetoData"
             android:layout_gravity="center"
