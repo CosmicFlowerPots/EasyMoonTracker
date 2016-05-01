@@ -8,19 +8,18 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,7 +33,7 @@ import java.util.concurrent.ExecutionException;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class MoonTrackerActivity extends AppCompatActivity implements SensorEventListener{
+public class MoonTrackerActivity extends AppCompatActivity implements SensorEventListener {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -52,22 +51,22 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
      * and a change of the status and navigation bar.
      */
     private static final int UI_ANIMATION_DELAY = 300;
-
-    private View mContentView;
-    private View mControlsView;
-    private boolean mVisible;
-    private TextView magnetoData;
-    private TextView letrero;
-    private SensorManager mSensorManager;
-    private Sensor accelerometer = null;
-    private Sensor magnetometer = null;
-    private float[] rotationMatrix = new float[9];
-    private float[] accelerometerValues = new float[3];
-    private float[] magnetometerValues = new float[3];
-    private float[] orientation = {0,0,0};
-    private float[] orientationAux = {0,0,0};
+    private final Handler mHideHandler = new Handler();
+    /**
+     * Touch listener to use for in-layout UI controls to delay hiding the
+     * system UI. This is to prevent the jarring behavior of controls going away
+     * while interacting with activity UI.
+     */
+    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+            if (AUTO_HIDE) {
+                delayedHide(AUTO_HIDE_DELAY_MILLIS);
+            }
+            return false;
+        }
+    };
     public Camera mCamera;
-    private CameraPreview mPreview;
     AsynctaskJSON proof = new AsynctaskJSON();
     String wololo;
     String phase;
@@ -76,7 +75,54 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     double rangeAmplitude = 1.0;
     ImageView moonImg;
     Vibrator v;
+    private View mContentView;
+    private final Runnable mHidePart2Runnable = new Runnable() {
+        @SuppressLint("InlinedApi")
+        @Override
+        public void run() {
+            // Delayed removal of status and navigation bar
 
+            // Note that some of these constants are new as of API 16 (Jelly Bean)
+            // and API 19 (KitKat). It is safe to use them, as they are inlined
+            // at compile-time and do nothing on earlier devices.
+            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        }
+    };
+    private View mControlsView;
+    private final Runnable mShowPart2Runnable = new Runnable() {
+        @Override
+        public void run() {
+            // Delayed display of UI elements
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.show();
+            }
+            mControlsView.setVisibility(View.VISIBLE);
+        }
+    };
+    private boolean mVisible;
+    private final Runnable mHideRunnable = new Runnable() {
+        @Override
+        public void run() {
+            hide();
+        }
+    };
+    private TextView magnetoData;
+    private TextView letrero;
+    private SensorManager mSensorManager;
+    private Sensor accelerometer = null;
+    private Sensor magnetometer = null;
+    private float[] rotationMatrix = new float[9];
+    private float[] accelerometerValues = new float[3];
+    private float[] magnetometerValues = new float[3];
+    private float[] orientation = {0, 0, 0};
+    private float[] orientationAux = {0, 0, 0};
+    private CameraPreview mPreview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,8 +133,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
 
-
-        if (accelerometer != null && magnetometer != null){
+        if (accelerometer != null && magnetometer != null) {
             mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
@@ -134,12 +179,10 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         preview.addView(mPreview);
 
 
-
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
         // findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
-
 
 
     }
@@ -150,7 +193,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 //        TextView textThree = (TextView) findViewById(R.id.moonCrapThree);
         try {
             JSONArray jArray = new JSONArray(data);
-            for(int i=0; i < jArray.length(); i++) {
+            for (int i = 0; i < jArray.length(); i++) {
 
                 JSONObject jObject = jArray.getJSONObject(i);
 
@@ -176,21 +219,6 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         delayedHide(100);
     }
 
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
-
     private void toggle() {
         if (mVisible) {
             hide();
@@ -213,24 +241,6 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
     }
 
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
-
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        }
-    };
-
     @SuppressLint("InlinedApi")
     private void show() {
         // Show the system bar
@@ -243,26 +253,6 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
     }
 
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-
-    private final Handler mHideHandler = new Handler();
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-
     /**
      * Schedules a call to hide() in [delay] milliseconds, canceling any
      * previously scheduled calls.
@@ -274,7 +264,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        switch (event.sensor.getType()){
+        switch (event.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
                 accelerometerValues = event.values;
                 break;
@@ -287,11 +277,11 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         orientationAux = SensorManager.getOrientation(this.rotationMatrix, this.orientation);
         magnetoData = (TextView) findViewById(R.id.magnetoDataText);
         DecimalFormat formatoDecimal = new DecimalFormat("###.##");
-        Double oriHorz = (double)Math.toDegrees(orientation[0]);
-        Double oriVer = (double)Math.toDegrees(orientation[1]);
+        Double oriHorz = Math.toDegrees(orientation[0]);
+        Double oriVer = Math.toDegrees(orientation[1]);
         magnetoData.setText("H:" + String.valueOf(formatoDecimal.format(oriHorz))
-                            + "\n" +
-                            "V: " + String.valueOf(formatoDecimal.format(oriVer)));
+                + "\n" +
+                "V: " + String.valueOf(formatoDecimal.format(oriVer)));
 //                            + "\n" +
 //                            "Acimut aux:" + String.valueOf(orientationAux[0])
 //                            + "\n" +
@@ -300,23 +290,19 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         onSensorChangedRationally();
     }
 
-    public void onSensorChangedRationally()
-    {
+    public void onSensorChangedRationally() {
 
-        if ((double)orientation[0] > azimuth - rangeAmplitude &&
-            (double)orientation[0] < azimuth + rangeAmplitude &&
-            (double)orientation[1] > altitude - rangeAmplitude &&
-            (double)orientation[1] < altitude + rangeAmplitude)
-        {
+        if ((double) orientation[0] > azimuth - rangeAmplitude &&
+                (double) orientation[0] < azimuth + rangeAmplitude &&
+                (double) orientation[1] > altitude - rangeAmplitude &&
+                (double) orientation[1] < altitude + rangeAmplitude) {
 
             letrero.setText("¡Ahí está!");
             //ImageView moonImg = (ImageView) findViewById(R.id.moonpic);
             moonImg.setImageResource(R.drawable.bigmoon);
             moonImg.bringToFront();
             v.vibrate(500);
-        }
-        else
-        {
+        } else {
             letrero.setText("¡Sigue buscando!");
             moonImg.setImageResource(0);
         }
@@ -328,33 +314,25 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 
     }
 
-    void initCamera()
-    {
-        if(Camera.getNumberOfCameras()>0)
-        {
-            mCamera= Camera.open(0);
-            try
-            {
+    void initCamera() {
+        if (Camera.getNumberOfCameras() > 0) {
+            mCamera = Camera.open(0);
+            try {
                 //mCamera.cancelAutoFocus();
                 Camera.Parameters params = mCamera.getParameters();
                 params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
                 mCamera.setParameters(params);
-            }
-            catch (RuntimeException a) {
+            } catch (RuntimeException a) {
 
             }
-            try{
+            try {
 
                 mCamera.setDisplayOrientation(90);
-            }
-            catch (NullPointerException a)
-            {
+            } catch (NullPointerException a) {
                 mCamera.setDisplayOrientation(90);
             }
 
-        }
-        else
-        {
+        } else {
             new AlertDialog.Builder(this)
                     .setTitle("Error :(")
                     .setPositiveButton("Quit", new DialogInterface.OnClickListener() {
@@ -372,7 +350,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 
     }
 
-    public float[] getOrientation(){
+    public float[] getOrientation() {
         return orientation;
     }
 }
