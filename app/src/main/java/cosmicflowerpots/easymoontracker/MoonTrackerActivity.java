@@ -128,39 +128,14 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-
-
-        if (accelerometer != null && magnetometer != null) {
-            mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-            mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
-        }
-
-        setContentView(R.layout.activity_moon_tracker);
-        moonImg = (ImageView) findViewById(R.id.moonpic);
-        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        initSensors();
 
         //moonImg.invalidate();
 
-        proof.execute();
-        try {
-            wololo = proof.get();
-            JSONDataParse(wololo);
-            //text.setText(wololo);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+        getProofData();
 
-        mVisible = true;
-        magnetoData = (TextView) findViewById(R.id.magnetoDataText);
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
-        int azimuth = (int) orientation[0];
-        letrero = (TextView) findViewById(R.id.letrero);
+        setLayout();
+        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -183,6 +158,44 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
         // findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+
+
+    }
+
+    private void setLayout() {
+        setContentView(R.layout.activity_moon_tracker);
+        moonImg = (ImageView) findViewById(R.id.moonpic);
+
+        mVisible = true;
+        magnetoData = (TextView) findViewById(R.id.magnetoDataText);
+        mControlsView = findViewById(R.id.fullscreen_content_controls);
+        mContentView = findViewById(R.id.fullscreen_content);
+        letrero = (TextView) findViewById(R.id.letrero);
+    }
+
+    private void getProofData() {
+        proof.execute();
+        try {
+            wololo = proof.get();
+            JSONDataParse(wololo);
+            //text.setText(wololo);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initSensors() {
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+
+        if (accelerometer != null && magnetometer != null) {
+            mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
 
 
     }
@@ -282,10 +295,6 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         magnetoData.setText("H:" + String.valueOf(formatoDecimal.format(oriHorz))
                 + "\n" +
                 "V: " + String.valueOf(formatoDecimal.format(oriVer)));
-//                            + "\n" +
-//                            "Acimut aux:" + String.valueOf(orientationAux[0])
-//                            + "\n" +
-//                            "Elevación aux: " + String.valueOf(orientationAux[1]));
 
         onSensorChangedRationally();
     }
@@ -314,7 +323,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
 
     }
 
-    void initCamera() {
+    private void initCamera() {
         if (Camera.getNumberOfCameras() > 0) {
             mCamera = Camera.open(0);
             try {
@@ -339,9 +348,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
                         public void onClick(DialogInterface dialog, int which) {
                             finish();
                         }
-                    })
-
-                    .show();
+                    }).show();
         }
     }
 
