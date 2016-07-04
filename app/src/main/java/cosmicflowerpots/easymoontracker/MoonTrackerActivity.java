@@ -10,7 +10,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Vibrator;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +27,9 @@ import org.json.JSONObject;
 import java.text.DecimalFormat;
 import java.util.concurrent.ExecutionException;
 
+//He quitado el toggle para que el usuario no pueda apretar y le salga el menu del sistema(comentado)
+//A la mierda el vibrador
+//Interfaz mejorada
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -74,7 +76,6 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     double altitude;
     double rangeAmplitude = 1.0;
     ImageView moonImg;
-    Vibrator v;
     private View mContentView;
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
@@ -129,22 +130,18 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         super.onCreate(savedInstanceState);
 
         initSensors();
-
-        //moonImg.invalidate();
-
         getProofData();
 
         setLayout();
-        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-
+        //ESTO ES LO DE LA INTERFAZ
         // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
+        /*mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 toggle();
             }
-        });
+        });*/
 
 
         // Camara
@@ -201,9 +198,6 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
     }
 
     public void JSONDataParse(String data) {
-//        TextView text = (TextView) findViewById(R.id.moonCrap);
-//        TextView textTwo = (TextView) findViewById(R.id.moonCrapTwo);
-//        TextView textThree = (TextView) findViewById(R.id.moonCrapThree);
         try {
             JSONArray jArray = new JSONArray(data);
             for (int i = 0; i < jArray.length(); i++) {
@@ -292,8 +286,8 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
         DecimalFormat formatoDecimal = new DecimalFormat("###.##");
         Double oriHorz = Math.toDegrees(orientation[0]);
         Double oriVer = Math.toDegrees(orientation[1]);
-        magnetoData.setText("H:" + String.valueOf(formatoDecimal.format(oriHorz))
-                + "\n" +
+        magnetoData.setText("EMT \t\t H:" + String.valueOf(formatoDecimal.format(oriHorz))
+                +
                 "V: " + String.valueOf(formatoDecimal.format(oriVer)));
 
         onSensorChangedRationally();
@@ -310,7 +304,7 @@ public class MoonTrackerActivity extends AppCompatActivity implements SensorEven
             //ImageView moonImg = (ImageView) findViewById(R.id.moonpic);
             moonImg.setImageResource(R.drawable.bigmoon);
             moonImg.bringToFront();
-            v.vibrate(500);
+            //v.vibrate(500);
         } else {
             letrero.setText("¡Sigue buscando!");
             moonImg.setImageResource(0);
