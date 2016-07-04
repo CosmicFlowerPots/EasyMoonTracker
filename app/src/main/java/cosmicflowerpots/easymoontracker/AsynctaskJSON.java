@@ -19,7 +19,7 @@ public class AsynctaskJSON extends AsyncTask<Void, Void, String> {
     protected String doInBackground(Void... params) {
         HttpURLConnection c = null;
         try {
-            URL u = new URL("http://blacklo.ddns.net/SpaceApps/moon_data_JSON.json");
+            URL u = new URL("http://blacklo.rbel.co/moonTrack/moon_data_JSON.json");
             c = (HttpURLConnection) u.openConnection();
             c.connect();
             int status = c.getResponseCode();

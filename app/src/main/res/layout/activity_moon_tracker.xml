@@ -2,7 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0099cc"
+    android:background="@color/colorPrimaryDark"
+    android:layout_weight="1"
     tools:context="cosmicflowerpots.easymoontracker.MoonTrackerActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
@@ -10,67 +11,61 @@
          TextureView, etc. -->
     <TextView android:id="@+id/fullscreen_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:keepScreenOn="true"
         android:textColor="#33b5e5"
-        android:textStyle="bold"
-        android:textSize="50sp"
+        android:textSize="30sp"
         android:gravity="center"
         android:text="@string/dummy_content" />
 
-    <!-- This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows. -->
-    <FrameLayout android:id="@+id/camera_preview" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1">
+    <FrameLayout android:id="@+id/camera_preview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1">
+
     </FrameLayout>
 
-        <LinearLayout android:id="@+id/fullscreen_content_controls"
-            style="?metaButtonBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/black_overlay"
-            android:orientation="horizontal"
-            tools:ignore="UselessParent">
+    <LinearLayout android:id="@+id/fullscreen_content_controls"
+        style="?metaButtonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="@color/black_overlay"
+        android:orientation="horizontal"
+        tools:ignore="UselessParent">
 
-            <Button android:id="@+id/dummy_button"
-                style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/dummy_button" />
+    </LinearLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/ifacemoon"
+        android:id="@+id/imageView"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:textColor="#FFFFFF"
+        android:text="@string/magnetoData"
+        android:background="@drawable/background_with_shadow"
+        android:layout_gravity="top"
+        android:id="@+id/magnetoDataText" />
 
-        </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:id="@+id/letrero"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/top_shadow"
+        android:layout_gravity="center_horizontal|bottom"
+        android:gravity="center"/>
+    <ImageView
+        android:id="@+id/moonpic"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/bigmoon"
+        android:layout_gravity="center"
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/magnetoData"
-            android:layout_gravity="bottom"
-            android:id="@+id/magnetoDataText" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="#00ff00"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Tiempo: 60 s."
-            android:layout_gravity="top"
-            android:id="@+id/punctuation" />
-
-        <TextView
-            android:layout_width="229dp"
-            android:layout_height="100dp"
-            android:id="@+id/letrero"
-            android:layout_gravity="center_horizontal|bottom" />
-        <ImageView
-
-            android:id="@+id/moonpic"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/bigmoon"
-            android:layout_gravity="center"
-
-            />
+        />
 </FrameLayout>
 
